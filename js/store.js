@@ -320,6 +320,7 @@
     var order = DE.Orders.create({
       customer: { name: name, phone: phone, deliveryType: deliveryType, address: address, notes: notes },
       payment: payment,
+      channel: "site",
       items: lines.map(function (l) {
         return { productId: l.productId, name: l.name, qty: l.qty, unitPrice: l.unitPrice, subtotal: l.subtotal };
       }),

@@ -281,7 +281,7 @@
       if (status === STATUS.PAGO && !wasPago) {
         Caixa.addEntry({
           type: "entrada",
-          description: "Venda " + order.code + " - " + order.customer.name,
+          description: "Venda " + order.code + " - " + order.customer.name + (order.channel === "presencial" ? " (presencial)" : ""),
           value: order.total,
           orderId: order.id,
           auto: true,

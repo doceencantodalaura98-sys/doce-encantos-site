@@ -17,6 +17,7 @@ doce-encantos-site/
     ├── login.html
     ├── dashboard.html
     ├── vendas.html
+    ├── venda-manual.html      -> Registrar vendas presenciais (feira, balcão)
     ├── estoque.html
     ├── caixa.html
     ├── configuracoes.html
@@ -52,9 +53,13 @@ Acesse **admin/login.html** (ou clique em "Área restrita" no rodapé da loja).
 No painel você encontra:
 - **Dashboard:** vendas do dia, pedidos pendentes, saldo em caixa, gráfico dos
   últimos 7 dias e alerta de estoque baixo.
-- **Vendas:** lista de todos os pedidos, com busca/filtro por status. É aqui
-  que você marca um pedido como "Pago" (o que lança automaticamente a entrada
-  no caixa) ou cancela um pedido (devolve o estoque).
+- **Vendas:** lista de todos os pedidos, com busca/filtro por status e por
+  canal (Site ou Presencial). É aqui que você marca um pedido como "Pago"
+  (o que lança automaticamente a entrada no caixa), marca como "Entregue"
+  ou cancela um pedido (devolve o estoque).
+- **Venda manual:** para registrar vendas feitas fora do site — por exemplo,
+  numa feira, praça ou balcão. Veja a seção "Venda manual (vendas
+  presenciais)" abaixo.
 - **Estoque:** cadastro de produtos, com foto, preço normal, preço promocional
   e a partir de quantas unidades a promoção vale, quantidade em estoque e
   alerta de estoque mínimo. Ao cadastrar ou editar um produto, clique em
@@ -105,6 +110,37 @@ compartilhado de verdade (posso te ajudar com isso depois, usando algum
 serviço gratuito como Firebase, por exemplo). Sem isso, o WhatsApp
 continua sendo o canal confiável para o cliente saber da confirmação do
 pedido em tempo real.
+
+## Venda manual (vendas presenciais)
+
+Use esta função quando você vender fora do site — numa feira, praça, evento
+ou balcão — e precisar dar baixa no estoque e lançar o valor no caixa depois.
+
+Acesse **Admin > Venda manual**:
+
+1. Escolha o produto e a quantidade vendida e clique em "+ Adicionar item"
+   (pode adicionar vários produtos diferentes na mesma venda). O preço já
+   aplica a promoção automaticamente, igual no site (ex: 10 unidades saem a
+   R$ 6,00 cada).
+2. Se quiser, informe o nome do cliente e uma observação (ex: "Feira da
+   praça central"). Se deixar em branco, o sistema registra como
+   "Venda balcão".
+3. Escolha a forma de pagamento e clique em "Registrar venda".
+
+Ao registrar, o sistema automaticamente:
+- Dá baixa na quantidade vendida no **Estoque**.
+- Já marca a venda como **Paga** e lança a entrada correspondente no
+  **Caixa** (com a observação "(presencial)" para você diferenciar das
+  vendas feitas pelo site).
+- Mostra a venda na tela **Vendas**, com a etiqueta 🧺 **Presencial** (as
+  vendas feitas pelos clientes no site aparecem com a etiqueta 🌐 **Site**).
+  Você pode filtrar a lista de vendas por canal (Site/Presencial) sempre
+  que quiser separar os dois tipos.
+
+Como essa venda não passa pelo carrinho do site, ela não gera número de
+pedido para o cliente acompanhar (não faz sentido, já que foi entregue e
+paga na hora) — mas conta normalmente nos relatórios, no caixa e no
+dashboard, junto com as vendas do site.
 
 ## Regra de preço do Alfajor (já configurada)
 

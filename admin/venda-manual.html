@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Venda Manual - Painel Doce Encantos</title>
+<link rel="icon" href="../assets/logo.png" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+  <header class="shell-bar">
+    <div class="shell-left">
+      <img src="../assets/logo.png" class="shell-logo" alt="logo" />
+      <span class="shell-title">Doce Encantos | Painel Administrativo</span>
+    </div>
+    <div class="shell-right">
+      <div class="shell-user"><div class="shell-avatar">LA</div><span>lalbuquerque</span></div>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <nav class="side-nav">
+      <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a href="vendas.html"><span class="nav-icon">🧾</span> Vendas</a>
+      <a href="venda-manual.html" class="active"><span class="nav-icon">🧺</span> Venda manual</a>
+      <a href="estoque.html"><span class="nav-icon">📦</span> Estoque</a>
+      <a href="caixa.html"><span class="nav-icon">💰</span> Caixa</a>
+      <a href="configuracoes.html"><span class="nav-icon">⚙️</span> Configurações</a>
+      <a href="../index.html" target="_blank"><span class="nav-icon">🌐</span> Ver loja</a>
+    </nav>
+
+    <main class="main-content">
+      <div class="breadcrumb">Início &rsaquo; Venda manual</div>
+      <div class="page-header">
+        <h1 class="page-title">Registrar venda presencial</h1>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-top:-10px;margin-bottom:20px;max-width:640px;">
+        Use esta tela para lançar vendas feitas fora do site — numa feira, na praça, de porta em porta.
+        Ao registrar, o estoque dos produtos é baixado e o valor entra automaticamente no caixa como pago.
+      </p>
+
+      <div class="card">
+        <div class="card-header">Itens vendidos</div>
+        <div class="card-body">
+          <div class="form-row" style="align-items:end;">
+            <div class="form-group">
+              <label>Produto</label>
+              <select id="itemProduct"></select>
+            </div>
+            <div class="form-group" style="max-width:120px;">
+              <label>Quantidade</label>
+              <input type="number" id="itemQty" min="1" value="1" />
+            </div>
+            <div class="form-group" style="max-width:160px;">
+              <button type="button" class="btn btn-primary" id="addItemBtn" style="width:100%;">+ Adicionar item</button>
+            </div>
+          </div>
+
+          <table class="data-table" id="itemsTable" style="margin-top:10px;">
+            <thead>
+              <tr><th>Produto</th><th>Qtd.</th><th>Preço unit.</th><th>Subtotal</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <div style="text-align:right;font-size:18px;font-weight:700;margin-top:14px;">
+            Total: <span id="saleTotal">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Detalhes da venda</div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cliente (opcional)</label>
+              <input type="text" id="saleCustomerName" placeholder="Ex: cliente da feira, ou deixe em branco" />
+            </div>
+            <div class="form-group">
+              <label>Forma de pagamento</label>
+              <select id="salePayment">
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão">Cartão</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Local / observação (opcional)</label>
+            <input type="text" id="saleNotes" placeholder="Ex: Feira da praça central - sábado" />
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="registerSaleBtn" style="padding:12px 28px;font-size:15px;">Registrar venda</button>
+      <span id="savedMsg" style="display:none;color:var(--success);margin-left:12px;font-weight:600;">✓ Venda registrada e caixa atualizado!</span>
+
+      <div class="card" style="margin-top:28px;">
+        <div class="card-header">Últimas vendas presenciais</div>
+        <div class="card-body" style="padding:0;">
+          <table class="data-table" id="recentManualTable">
+            <thead><tr><th>Pedido</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    ADMIN.guard();
+    ADMIN.wireShell();
+    var fmt = DE.util.formatBRL;
+    var saleItems = []; // [{productId, qty}]
+
+    function populateProductSelect() {
+      var select = document.getElementById("itemProduct");
+      var products = DE.Products.all();
+      select.innerHTML = products.map(function (p) {
+        return '<option value="' + p.id + '">' + p.name + ' (estoque: ' + p.stock + ')</option>';
+      }).join("") || '<option value="">Nenhum produto cadastrado</option>';
+    }
+
+    function qtyAlreadyAdded(productId) {
+      var item = saleItems.find(function (i) { return i.productId === productId; });
+      return item ? item.qty : 0;
+    }
+
+    document.getElementById("addItemBtn").addEventListener("click", function () {
+      var productId = document.getElementById("itemProduct").value;
+      var qty = parseInt(document.getElementById("itemQty").value, 10);
+      if (!productId) { alert("Cadastre um produto em Estoque antes de registrar uma venda."); return; }
+      if (!qty || qty <= 0) { alert("Informe uma quantidade válida."); return; }
+
+      var product = DE.Products.get(productId);
+      var totalRequested = qtyAlreadyAdded(productId) + qty;
+      if (totalRequested > Number(product.stock)) {
+        alert("Quantidade maior que o estoque disponível. Estoque atual de " + product.name + ": " + product.stock);
+        return;
+      }
+
+      var existing = saleItems.find(function (i) { return i.productId === productId; });
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        saleItems.push({ productId: productId, qty: qty });
+      }
+      document.getElementById("itemQty").value = "1";
+      renderItems();
+    });
+
+    function saleLines() {
+      return saleItems.map(function (i) {
+        var product = DE.Products.get(i.productId);
+        if (!product) return null;
+        var unitPrice = DE.Products.unitPriceFor(product, i.qty);
+        return { productId: i.productId, name: product.name, qty: i.qty, unitPrice: unitPrice, subtotal: unitPrice * i.qty };
+      }).filter(Boolean);
+    }
+
+    function renderItems() {
+      var lines = saleLines();
+      var tbody = document.querySelector("#itemsTable tbody");
+      if (lines.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum item adicionado ainda.</td></tr>';
+      } else {
+        tbody.innerHTML = lines.map(function (l) {
+          return "<tr>" +
+            "<td>" + l.name + "</td>" +
+            "<td>" + l.qty + "</td>" +
+            "<td>" + fmt(l.unitPrice) + "</td>" +
+            "<td>" + fmt(l.subtotal) + "</td>" +
+            '<td><button class="btn btn-danger btn-sm" data-id="' + l.productId + '">Remover</button></td>' +
+          "</tr>";
+        }).join("");
+      }
+      var total = lines.reduce(function (a, l) { return a + l.subtotal; }, 0);
+      document.getElementById("saleTotal").textContent = fmt(total);
+    }
+
+    document.querySelector("#itemsTable tbody").addEventListener("click", function (e) {
+      var btn = e.target.closest("button[data-id]");
+      if (!btn) return;
+      saleItems = saleItems.filter(function (i) { return i.productId !== btn.getAttribute("data-id"); });
+      renderItems();
+    });
+
+    document.getElementById("registerSaleBtn").addEventListener("click", function () {
+      var lines = saleLines();
+      if (lines.length === 0) {
+        alert("Adicione pelo menos um item para registrar a venda.");
+        return;
+      }
+
+      var customerName = document.getElementById("saleCustomerName").value.trim() || "Venda balcão";
+      var payment = document.getElementById("salePayment").value;
+      var notes = document.getElementById("saleNotes").value.trim();
+      var total = lines.reduce(function (a, l) { return a + l.subtotal; }, 0);
+
+      var order = DE.Orders.create({
+        customer: { name: customerName, phone: "", deliveryType: "retirada", address: "", notes: notes },
+        payment: payment,
+        channel: "presencial",
+        items: lines.map(function (l) {
+          return { productId: l.productId, name: l.name, qty: l.qty, unitPrice: l.unitPrice, subtotal: l.subtotal };
+        }),
+        deliveryFee: 0,
+        total: total,
+      });
+
+      DE.Orders.updateStatus(order.id, DE.Orders.STATUS.PAGO);
+
+      saleItems = [];
+      renderItems();
+      document.getElementById("saleCustomerName").value = "";
+      document.getElementById("saleNotes").value = "";
+      populateProductSelect();
+      renderRecentManualSales();
+
+      var msg = document.getElementById("savedMsg");
+      msg.style.display = "inline";
+      setTimeout(function () { msg.style.display = "none"; }, 3000);
+    });
+
+    function renderRecentManualSales() {
+      var sales = DE.Orders.all().filter(function (o) { return o.channel === "presencial"; }).slice(0, 10);
+      var tbody = document.querySelector("#recentManualTable tbody");
+      if (sales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhuma venda presencial registrada ainda.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = sales.map(function (o) {
+        var itemsSummary = o.items.map(function (i) { return i.qty + "x " + i.name; }).join(", ");
+        return "<tr>" +
+          "<td>#" + o.code + "</td>" +
+          "<td>" + DE.util.formatDate(o.createdAt) + "</td>" +
+          "<td>" + itemsSummary + "</td>" +
+          "<td>" + o.payment + "</td>" +
+          "<td>" + fmt(o.total) + "</td>" +
+        "</tr>";
+      }).join("");
+    }
+
+    populateProductSelect();
+    renderItems();
+    renderRecentManualSales();
+  </script>
+</body>
+</html>

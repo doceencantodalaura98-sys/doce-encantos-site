@@ -24,6 +24,7 @@
     <nav class="side-nav">
       <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
       <a href="vendas.html" class="active"><span class="nav-icon">🧾</span> Vendas</a>
+      <a href="venda-manual.html"><span class="nav-icon">🧺</span> Venda manual</a>
       <a href="estoque.html"><span class="nav-icon">📦</span> Estoque</a>
       <a href="caixa.html"><span class="nav-icon">💰</span> Caixa</a>
       <a href="configuracoes.html"><span class="nav-icon">⚙️</span> Configurações</a>
@@ -45,6 +46,11 @@
           <option value="Entregue">Entregue</option>
           <option value="Cancelado">Cancelado</option>
         </select>
+        <select id="channelFilter">
+          <option value="">Todos os canais</option>
+          <option value="site">🌐 Site</option>
+          <option value="presencial">🧺 Presencial</option>
+        </select>
         <div class="spacer"></div>
         <span id="resultCount" style="color:var(--muted);font-size:12.5px;"></span>
       </div>
@@ -54,7 +60,7 @@
           <table class="data-table" id="ordersTable">
             <thead>
               <tr>
-                <th>Pedido</th><th>Data</th><th>Cliente</th><th>WhatsApp</th>
+                <th>Pedido</th><th>Canal</th><th>Data</th><th>Cliente</th><th>WhatsApp</th>
                 <th>Itens</th><th>Entrega</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th>
               </tr>
             </thead>
@@ -86,12 +92,15 @@
     function filteredOrders() {
       var search = document.getElementById("searchInput").value.trim().toLowerCase();
       var status = document.getElementById("statusFilter").value;
+      var channel = document.getElementById("channelFilter").value;
       return DE.Orders.all().filter(function (o) {
         var matchesSearch = !search ||
           o.customer.name.toLowerCase().indexOf(search) >= 0 ||
           o.code.toLowerCase().indexOf(search) >= 0;
         var matchesStatus = !status || o.status === status;
-        return matchesSearch && matchesStatus;
+        var orderChannel = o.channel === "presencial" ? "presencial" : "site";
+        var matchesChannel = !channel || orderChannel === channel;
+        return matchesSearch && matchesStatus && matchesChannel;
       });
     }
 
@@ -101,14 +110,16 @@
       var tbody = document.querySelector("#ordersTable tbody");
 
       if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Nenhum pedido encontrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-state">Nenhum pedido encontrado.</td></tr>';
         return;
       }
 
       tbody.innerHTML = orders.map(function (o) {
         var itemsSummary = o.items.map(function (i) { return i.qty + "x " + i.name; }).join(", ");
+        var channelBadge = o.channel === "presencial" ? "🧺 Presencial" : "🌐 Site";
         return "<tr>" +
           "<td>#" + o.code + "</td>" +
+          "<td>" + channelBadge + "</td>" +
           "<td>" + DE.util.formatDate(o.createdAt) + "</td>" +
           "<td>" + o.customer.name + "</td>" +
           "<td>" + o.customer.phone + "</td>" +
@@ -135,7 +146,7 @@
       body.innerHTML =
         "<p><strong>Pedido:</strong> #" + order.code + "</p>" +
         "<p><strong>Data:</strong> " + DE.util.formatDate(order.createdAt) + "</p>" +
-        "<p><strong>Cliente:</strong> " + order.customer.name + " (" + order.customer.phone + ")</p>" +
+        "<p><strong>Cliente:</strong> " + order.customer.name + (order.customer.phone ? " (" + order.customer.phone + ")" : "") + "</p>" +
         "<p><strong>Entrega:</strong> " + (order.customer.deliveryType === "entrega" ? "Entrega - " + order.customer.address : "Retirada no local") + "</p>" +
         (order.customer.notes ? "<p><strong>Observações:</strong> " + order.customer.notes + "</p>" : "") +
         "<hr/>" + itemsHtml + "<hr/>" +
@@ -174,6 +185,7 @@
 
     document.getElementById("searchInput").addEventListener("input", render);
     document.getElementById("statusFilter").addEventListener("change", render);
+    document.getElementById("channelFilter").addEventListener("change", render);
 
     render();
   </script>
