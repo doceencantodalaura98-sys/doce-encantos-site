@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Doce Encantos - Alfajores Artesanais</title>
+<link rel="icon" href="assets/logo.png" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <img src="assets/logo.png" alt="Doce Encantos" class="brand-logo" />
+      </div>
+      <nav class="header-nav">
+        <a href="#produtos">Produtos</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="pedido.html">Acompanhar pedido</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <button class="cart-btn" id="openCartBtn" aria-label="Abrir carrinho">
+        🛒 <span id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <h1>Alfajores artesanais feitos com carinho 🐝</h1>
+        <p>Doce de leite cremoso, cobertura irresistível e aquele sabor caseiro que encanta. Peça já o seu!</p>
+        <a href="#produtos" class="btn btn-primary">Ver produtos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROMO BAR ===================== -->
+  <div class="promo-bar">
+    🍯 Compre <strong>2 ou mais</strong> alfajores e pague apenas <strong>R$ 6,00</strong> a unidade!
+  </div>
+
+  <!-- ===================== PRODUTOS ===================== -->
+  <main class="container">
+    <section id="produtos" class="section">
+      <h2 class="section-title">Nossos produtos</h2>
+      <div class="product-grid" id="productGrid">
+        <!-- produtos inseridos via JS -->
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section how-it-works">
+      <h2 class="section-title">Como funciona</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <p>Escolha a quantidade de alfajores e adicione ao carrinho</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <p>Preencha seus dados de entrega/retirada</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <p>Escolha a forma de pagamento e finalize o pedido</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <p>Combine a entrega com a gente pelo WhatsApp 🍬</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== CARRINHO (drawer) ===================== -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>Seu carrinho</h3>
+      <button id="closeCartBtn" class="icon-btn">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="empty-msg" id="emptyCartMsg">Seu carrinho está vazio.</p>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-line">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">R$ 0,00</strong>
+      </div>
+      <div class="cart-line" id="deliveryLine" hidden>
+        <span>Entrega</span>
+        <strong id="cartDelivery">R$ 0,00</strong>
+      </div>
+      <div class="cart-line cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+      <button class="btn btn-primary btn-block" id="goToCheckoutBtn">Finalizar pedido</button>
+    </div>
+  </aside>
+
+  <!-- ===================== CHECKOUT (modal) ===================== -->
+  <div class="modal-overlay" id="checkoutOverlay">
+    <div class="modal checkout-modal">
+      <div class="modal-header">
+        <h3>Finalizar pedido</h3>
+        <button id="closeCheckoutBtn" class="icon-btn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Etapa 1: dados do cliente -->
+        <div class="checkout-step" id="stepCustomer">
+          <h4>1. Seus dados</h4>
+          <label>Nome completo
+            <input type="text" id="custName" placeholder="Seu nome" required />
+          </label>
+          <label>WhatsApp / telefone
+            <input type="tel" id="custPhone" placeholder="(00) 00000-0000" required />
+          </label>
+          <label>Forma de recebimento
+            <select id="deliveryType">
+              <option value="retirada">Retirar no local</option>
+              <option value="entrega">Entrega (combinar endereço)</option>
+            </select>
+          </label>
+          <label id="addressWrap">
+            Endereço para entrega
+            <input type="text" id="custAddress" placeholder="Rua, número, bairro" />
+          </label>
+          <label>Observações (opcional)
+            <textarea id="custNotes" placeholder="Ex: sem açúcar, retirar após às 18h..."></textarea>
+          </label>
+        </div>
+
+        <!-- Etapa 2: pagamento -->
+        <div class="checkout-step" id="stepPayment">
+          <h4>2. Pagamento</h4>
+          <div class="payment-options">
+            <label class="payment-option">
+              <input type="radio" name="payment" value="Pix" checked />
+              <span>Pix</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="Dinheiro" />
+              <span>Dinheiro</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment" value="Cartão" />
+              <span>Cartão (na entrega/retirada)</span>
+            </label>
+          </div>
+          <p class="pix-info" id="pixInfo" hidden></p>
+        </div>
+
+        <!-- Etapa 3: resumo -->
+        <div class="checkout-step" id="stepSummary">
+          <h4>3. Resumo do pedido</h4>
+          <div id="summaryItems"></div>
+          <div class="cart-line cart-total">
+            <span>Total</span>
+            <strong id="summaryTotal">R$ 0,00</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="backToCartBtn">Voltar ao carrinho</button>
+        <button class="btn btn-primary" id="confirmOrderBtn">Confirmar pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONFIRMAÇÃO (modal) ===================== -->
+  <div class="modal-overlay" id="successOverlay">
+    <div class="modal success-modal">
+      <div class="success-icon">🎉</div>
+      <h3>Pedido realizado!</h3>
+      <p>Seu pedido <strong id="successCode"></strong> foi registrado.</p>
+      <p style="font-size:0.85rem;color:var(--muted);">Guarde este número: é com ele (e o telefone informado) que você acompanha a situação do seu pedido a qualquer momento.</p>
+      <p id="successWhatsMsg">Abrimos o WhatsApp em outra aba com sua mensagem pronta — é só clicar em enviar por lá. Se não abrir automaticamente, use o botão abaixo.</p>
+      <a href="#" target="_blank" class="btn btn-primary btn-block" id="whatsappBtn">Abrir WhatsApp</a>
+      <a href="#" class="btn btn-outline btn-block" id="trackOrderLink">Acompanhar este pedido</a>
+      <button class="btn btn-outline btn-block" id="closeSuccessBtn">Fechar</button>
+    </div>
+  </div>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer" id="contato">
+    <div class="container footer-inner">
+      <img src="assets/logo.png" alt="Doce Encantos" class="footer-logo" />
+      <p>Doce Encantos &copy; <span id="year"></span> - Feito com amor e açúcar 🍯</p>
+      <a href="admin/login.html" class="admin-link">Área restrita</a>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+</body>
+</html>
