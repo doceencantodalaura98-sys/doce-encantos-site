@@ -38,6 +38,38 @@ python3 -m http.server 8000
 ```
 Depois acesse `http://localhost:8000` no navegador.
 
+## Se você atualizar o site e a outra pessoa não vir a mudança
+
+Isso pode acontecer por dois motivos bem diferentes:
+
+**1) Mudou o código (layout, textos, uma função nova) e a outra pessoa
+continua vendo a versão antiga.**
+Isso normalmente é o navegador da outra pessoa guardando uma cópia salva
+(cache) das páginas/arquivos. Para reduzir esse problema, todos os arquivos
+HTML já carregam o CSS e o JS com um "número de versão" no final do link
+(ex: `js/data.js?v=20260905`). Sempre que você fizer uma atualização de
+código e enviar pro GitHub, troque esse número (ele aparece logo no início
+de cada arquivo `.html`, nos links de `css/...` e `js/...`) — por exemplo,
+mude `?v=20260905` para `?v=20260906`. Isso obriga o navegador de todo
+mundo a baixar a versão nova na próxima vez que abrir o site, em vez de usar
+a cópia salva. Ainda assim, se alguém não estiver vendo a mudança mesmo
+com o número trocado, peça pra atualizar a página forçando (no computador:
+Ctrl+Shift+R ou Cmd+Shift+R; no celular, geralmente fechar a aba/o
+navegador e abrir de novo resolve).
+
+**2) Mudou um produto, preço, estoque ou foto no painel Admin, e a outra
+pessoa não vê a mudança.**
+Este caso é diferente e não tem solução por cache: como explicado na seção
+"Muito importante: entenda como os dados são guardados" abaixo, cada
+aparelho guarda seus próprios dados separadamente, porque o site não tem
+banco de dados/servidor. Uma alteração feita no seu painel fica só no seu
+navegador — o celular ou computador de outra pessoa nunca recebe essa
+atualização automaticamente, porque tecnicamente eles não estão "olhando"
+para o mesmo lugar. A única forma de resolver isso de verdade é migrar o
+site para usar um banco de dados compartilhado na nuvem (por exemplo,
+Firebase, que tem plano gratuito) — é uma mudança maior no projeto, mas
+possível de fazer depois, se você quiser.
+
 ### Publicar de verdade
 Você pode hospedar gratuitamente em serviços como Netlify, Vercel ou GitHub
 Pages, ou usar uma hospedagem paga (Hostinger, etc.). Basta enviar todos os
